@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/tokenPrice", async (req, res) => {
-  return res.status(200).json(usdPrices);
+  return res.status(200).json.parse({});
 });
 
 Moralis.start({

@@ -7,13 +7,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
   height: 100vh;
   width: 100vw;
-  background-color: rgb(25, 33, 52) !important;
+  /* background-color: rgb(25, 33, 52) !important;
   background: rgb(25, 33, 52);
   background: linear-gradient(
     180deg,
     rgba(25, 33, 52, 1) 28%,
     rgba(7, 8, 21, 1) 75%
-  );
+  ); */
+  
+  background-image: url(https://r4.wallpaperflare.com/wallpaper/997/301/176/spices-noodle-cheese-eggs-wallpaper-d8a84bf4e53d9266216aed0c9327a470.jpg);
+  background-position: center;
+  background-size: cover;
   color: white;
 }
 

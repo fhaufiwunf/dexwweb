@@ -9,6 +9,11 @@ header {
   align-items: center;
   padding-left: 50px;
   padding-right: 50px;
+  background: linear-gradient(
+    180deg,
+    rgba(25, 33, 52, 1) 28%,
+    rgba(7, 8, 21, 1) 75%
+  );
 }
 
 .logo{
@@ -70,9 +75,10 @@ header {
 }
 
 .mainWindow {
-  margin-top: 40px;
+  margin-top: 200px;
   display: flex;
   justify-content: center;
+
 }
 
 .link {

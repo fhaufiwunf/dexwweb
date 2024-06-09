@@ -1,19 +1,24 @@
-import { Token } from "@mui/icons-material";
-import "./App.css";
+import "./App.css"; 
 import Header from "./components/Header";
 import Swap from "./components/Swap";
-import swap from "./components/Swap";
-import token from "./components/Tokens";
+import Pool from "./components/Pool";
+import {Routes, Route} from "react-router-dom";
+import {useConnect, useAccount} from 'wagmi';
+import {MetaMaskConnector} from 'wagmi/connectors/metaMask';
 
-import {Routes, Route} from "react-router-dom"
 function App() {
+  const {address, isConnected} = useAccount();
+  const {connect} = useConnect({
+    connector: new MetaMaskConnector(),
+  });
+
   return(
     <div className="App">
-      <Header/>
+      <Header connect = {connect} isConnected={isConnected} address={address} />
       <div className="mainWindow">
         <Routes>
-          <Route path="/" element={<Swap/>}/>
-          <Route path="/token" element={<Token/>}/>
+          <Route path="/" element={<Swap isConnected={isConnected} address={address}/> }/>
+          <Route path="/Pool" element={<Pool/>}/>
         </Routes>
       </div>
     </div>

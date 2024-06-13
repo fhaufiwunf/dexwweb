@@ -1,42 +1,32 @@
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts ^5.0.0
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Spaggheti is ERC20, ERC20Pausable, AccessControl, ERC20Permit {
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    uint256 public constant priceOfToken = 1e18 wei;
-    address private _owner;
-
-    constructor(address defaultAdmin, address pauser, address minter)
+contract SpagghetiSwap is ERC20, ERC20Burnable, ERC20Pausable, Ownable {
+    constructor(address initialOwner)
         ERC20("Spaggheti", "SPD")
-        ERC20Permit("Spaggheti")
+        Ownable(initialOwner)
     {
-        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        _grantRole(PAUSER_ROLE, pauser);
-        _grantRole(MINTER_ROLE, minter);
-        _owner = msg.sender;
-        
     }
 
-    function pause() public onlyRole(PAUSER_ROLE) {
+    function pause() public onlyOwner {
         _pause();
     }
 
-    function unpause() public onlyRole(PAUSER_ROLE) {
+    function unpause() public onlyOwner {
         _unpause();
     }
 
-    
-    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
+    // The following functions are overrides required by Solidity.
 
     function _update(address from, address to, uint256 value)
         internal
@@ -123,17 +113,6 @@ contract Spaggheti is ERC20, ERC20Pausable, AccessControl, ERC20Permit {
         );
         ERC20(address(this)).transfer(msg.sender, _tokensBought);
 
-    }
-
-//Owner zone
-    function withdraw(uint256 amount) public onlyOwner {
-        require(address(this).balance >= amount, "Not enough ETH in contract");
-
-        payable(msg.sender).transfer(amount);
-    }
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Only owner can call this function");
-        _;
     }
 
 }

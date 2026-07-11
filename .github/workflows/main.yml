@@ -10,8 +10,6 @@ env:
   N8N_WEBHOOK_URL: https://unfitted-unsubtle-overdrive.ngrok-free.dev/webhook/security-scan-ai
 
 jobs:
-  security-scan:
-    runs-on: [self-hosted, linux, zap]
   build-scan-gate-deploy:
     runs-on: ubuntu-latest
 

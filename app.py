@@ -20,15 +20,12 @@ SUBTITLE = 'A lightweight account service for passive security-scan validation.'
 ENABLE_STATUS_API = True
 
 
-def render_page(title: str, body: str) -> bytes:
-    safe_title = html.escape(title)
-    status_link = '<a href="/api/status">API status</a>' if ENABLE_STATUS_API else ""
-    return f"""<!doctype html>
+HTML_TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{safe_title}</title>
+  <title>__TITLE__</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -76,12 +73,28 @@ def render_page(title: str, body: str) -> bytes:
       <a href="/">Home</a>
       <a href="/login">Login</a>
       <a href="/about">About</a>
-      {status_link}
+      __STATUS_LINK__
     </nav>
-    {body}
+    __BODY__
   </main>
 </body>
-</html>""".encode("utf-8")
+</html>
+"""
+
+
+def render_page(title: str, body: str) -> bytes:
+    status_link = (
+        '<a href="/api/status">API status</a>'
+        if ENABLE_STATUS_API
+        else ""
+    )
+    document = (
+        HTML_TEMPLATE
+        .replace("__TITLE__", html.escape(title))
+        .replace("__STATUS_LINK__", status_link)
+        .replace("__BODY__", body)
+    )
+    return document.encode("utf-8")
 
 
 class ApplicationHandler(BaseHTTPRequestHandler):
@@ -99,9 +112,12 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Cache-Control", "public, max-age=60")
 
-        # This simple cookie is for the local demonstration only.
+        # Deliberately simple local-demo cookie.
         if set_cookie:
-            self.send_header("Set-Cookie", f"demo_session={SITE_NAME}; Path=/")
+            self.send_header(
+                "Set-Cookie",
+                f"demo_session={SITE_NAME}; Path=/",
+            )
 
         if content_length is not None:
             self.send_header("Content-Length", str(content_length))
@@ -135,8 +151,8 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 f"""
                 <h1>{html.escape(SITE_NAME)}</h1>
                 <p>{html.escape(SUBTITLE)}</p>
-                <p>This application is started by Docker Compose before the
-                OWASP ZAP Baseline scan.</p>
+                <p>This application is started by Docker Compose before
+                the OWASP ZAP Baseline scan.</p>
                 <p><a href="/login">Open the login page</a></p>
                 """,
                 head_only=head_only,
@@ -171,9 +187,9 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 f"About {SITE_NAME}",
                 f"""
                 <h1>About</h1>
-                <p>{html.escape(SITE_NAME)} is a small local application
-                used to verify startup, passive scanning, report generation,
-                and dashboard ingestion.</p>
+                <p>{html.escape(SITE_NAME)} is a small local
+                application used to verify startup, passive scanning,
+                report generation, and dashboard ingestion.</p>
                 """,
                 head_only=head_only,
             )
@@ -204,7 +220,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
 
         if ENABLE_STATUS_API and path == "/api/status":
             payload = (
-                f'{{"service":"{SITE_NAME}","status":"online"}}'
+                f'{"service":"{SITE_NAME}","status":"online"}'
             ).encode("utf-8")
             self._send_headers(
                 HTTPStatus.OK,
@@ -243,7 +259,10 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         except ValueError:
             length = 0
 
-        raw_body = self.rfile.read(length).decode("utf-8", errors="replace")
+        raw_body = self.rfile.read(length).decode(
+            "utf-8",
+            errors="replace",
+        )
         form = parse_qs(raw_body)
 
         username = form.get("username", [""])[0]
@@ -252,7 +271,10 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         if username == "demo" and password == "demo123":
             self.send_response(HTTPStatus.FOUND)
             self.send_header("Location", "/dashboard")
-            self.send_header("Set-Cookie", f"authenticated={SITE_NAME}; Path=/")
+            self.send_header(
+                "Set-Cookie",
+                f"authenticated={SITE_NAME}; Path=/",
+            )
             self.end_headers()
             return
 
@@ -275,7 +297,10 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
 
-    server = ThreadingHTTPServer(("0.0.0.0", args.port), ApplicationHandler)
+    server = ThreadingHTTPServer(
+        ("0.0.0.0", args.port),
+        ApplicationHandler,
+    )
     print(f"{SITE_NAME} listening on http://0.0.0.0:{args.port}")
     server.serve_forever()
 
